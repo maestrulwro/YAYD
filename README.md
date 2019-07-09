@@ -7,7 +7,7 @@ After compiling with Visual Studio, YAYD.exe should be located in the same folde
 https://ytdl-org.github.io/youtube-dl/index.html
 https://www.ffmpeg.org/
 
-I am currently reviewing the code and commenting it in order to make it easy for other people to understand what I did. Yes, the code is probably very inefficient, but at least I tried. Fix it and make a pull request if you can do better, thank you!
+I am currently reviewing the code and commenting it in order to make it easy for other people to understand what I did. Yes, the code is probably very inefficient (cringe?), but at least I tried. Fix it and make a pull request if you can do better, thank you!
 
 Why would you need Yet Another Youtube Downloader?
 Sites that are free require you to download link by link. The length of the download is limited (30 minutes). And also you have no control over the quality of the download.
@@ -25,4 +25,10 @@ Ideally, YAYD could be abandoned for years, and if youtube-dl and FFmpeg CLI syn
 Legal trouble with Youtube?
 Well, I personally don't use YAYD, i listen music directly from Youtube. I did this for fun mostly. I AM NOT RESPONSIBLE FOR THE WAY YOU USE THIS. And if I am asked to take this down for legal reasons, I will. Contact me!
 
-May the mass*acceleration be with you!
+What's up with the NBT library?
+I planned to enable music library functionality. Ideally, YAYD would parse the titles of the videos downloaded or would contact 3rd party meta databases to get ID3v2 tags for the final MP3 files. Guess I am good at planning, but not at doing.
+And yes, it is the same format Minecraft uses. And yes, I made it myself. And yes, you can use it too in your projects (the same License applies to it, though I might change that in the future).
+
+If you discovered this, give me a sign so that I know I didn't do this for nothing.
+
+May the ( mass x acceleration ) be with you!
