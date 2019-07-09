@@ -1,0 +1,36 @@
+﻿In classes.cs
+	In ExternalCMDInteraction
+		Implement low level filtering for console junk
+		find console-independent way of working
+		check for naming errors
+	In YTDLInteract
+		In PlaylistInteraction
+			basically everything
+			comment the sh*t out of it (summaries ETICA ETICA)
+			check for naming errors
+		In GetMeta
+			comment the sh*t out of it (summaries ETICA ETICA)
+			check for naming errors
+		In Download
+			Better progress reportion (see youtube-dl source code?)
+			comment the sh*t out of it (summaries ETICA ETICA)
+			check for naming errors
+		In FormatList
+			find format given an id/property
+			comment the sh*t out of it (summaries ETICA ETICA)
+			check for naming errors
+		In Format
+			parse InitialNote to get encoding info
+			comment the sh*t out of it (summaries ETICA ETICA)
+			check for naming errors
+		In ProgressReportedEventArgs
+			Better progress reportion (see youtube-dl source code?) SEE DOWNLOAD
+			comment the sh*t out of it (summaries ETICA ETICA)
+			check for naming errors
+		In ThumbNailDownload
+			basically everything
+			comment the sh*t out of it (summaries ETICA ETICA)
+			check for naming errors
+	In Test windows
+		In YTDLGetMetaTester
+			DataGrid generate columns based on YTDLInteract.Format class

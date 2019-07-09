@@ -1,0 +1,52 @@
+﻿<Window x:Class="YAYD.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YAYD"
+        mc:Ignorable="d"
+        Title="Un alt program de descărcat muzică de pe Youtube/Yet another Youtube Downloader" Height="350" Width="600">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="About Musicarian">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <TextBlock TextWrapping="Wrap" TextAlignment="Justify">
+                The Musicarian is a tool for organizing audio collections, no matter their dimension or complexity.
+                The Musicarian also offers the option to download video files from Youtube.com and to later convert them to the desired format, or to keep them with the original format.
+                The Musicarian holds meta informations that the user can input, and it can help convert the files between standards.
+                </TextBlock>
+            </ScrollViewer>
+        </GroupBox>
+        <GroupBox Header="Pending processing" Grid.Column="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ListBox Name="PendingProcessingList" Grid.ColumnSpan="2"/>
+                <TextBox Name="NewToBeProcessedBox" Grid.Row="1"/>
+                <Button Name="NewToBeProcessedButton" Grid.Row="1" Grid.Column="1" Content="Add"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Categories from your library" Grid.Column="2">
+            <ListBox Name="ListOfCategories"/>
+        </GroupBox>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="3" TextAlignment="Center" TextWrapping="Wrap">
+            © Vlad-Florin Chelaru, 30 decembrie 2017, Bacău, România. <LineBreak/>
+            Toate drepturile rezervate. Utilizarea acestui soft fără acordul autorului constituie încălcarea drepturilor de autor și atrage după sine pedepsele prevăzute de lege!<LineBreak/>
+            All rights reserved. Using this software without prior consent from the developer is against the Copyright Law and is punishable as per the Law!
+        </TextBlock>
+    </Grid>
+</Window>
