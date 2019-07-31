@@ -8,12 +8,31 @@ namespace YAYD
 {
     public delegate void TrimmedDataReceivedEventHandler(object sender, AdvancedDataReceivedEventArgs e);
     public delegate void ProgressReportedEventHandler(object sender, ProgressReportedEventArgs e);
+    /// <summary>
+    /// The status a task can have at any moment. Strongly related to <c>IReturnData</c>.
+    /// </summary>
     public enum WorkerStatus
     {
+        /// <summary>
+        /// The task is initialized, but is not ready to be run (something else has to be done before).
+        /// Execute <c>IReturnData.Ready()</c> to check if the task is ready to be run.
+        /// </summary>
         Pending,
+        /// <summary>
+        /// The task is ready to be run, execute <c>IReturnData.Start()</c>.
+        /// </summary>
         Ready,
+        /// <summary>
+        /// The task is currently running.
+        /// </summary>
         Running,
+        /// <summary>
+        /// The task ended successfully.
+        /// </summary>
         Successful,
+        /// <summary>
+        /// An error occured.
+        /// </summary>
         Error
     }
     /// <summary>
@@ -21,6 +40,9 @@ namespace YAYD
     /// </summary>
     public interface IReturnData
     {
+        /// <summary>
+        /// The status of the task.
+        /// </summary>
         WorkerStatus Status { get; }
         /// <summary>
         /// The dispatcher of the <c>Thread</c> on which to raise the events.
@@ -58,7 +80,7 @@ namespace YAYD
         /// </summary>
         /// <returns><c>True</c> if <c>Status</c> is successfully changed, additionals conditions are met, preprocessing is successful and the thing is ready.
         /// <c>False</c> if something is wrong.</returns>
-        /// /// <remarks>Should be successfully called multiple times (multiple times should it return <c>True</c>).
+        /// <remarks>Should be successfully called multiple times (multiple times should it return <c>True</c>).
         /// When called the second, third, fourth time after first successful call (called while <c>Status</c> is <c>Ready</c> already), it should only return true (and do nothing more).</remarks>
         bool Ready();
     }
@@ -113,12 +135,12 @@ namespace YAYD
         }
         private void StartNextTask()
         {
-            if (GetNumberOfTasksWithGivenStatus(WorkerStatus.Running) >= MaxRunningTaskCount) return;
-            for (int i = 0; i < Tasks.Count; i++)
-                if (Tasks[i].Ready())
+            if (GetNumberOfTasksWithGivenStatus(WorkerStatus.Running) >= MaxRunningTaskCount) return; // if the number of running tasks is greater or equal to the number of max running tasks, exit
+            for (int i = 0; i < Tasks.Count; i++) // iterate through the tasks
+                if (Tasks[i].Ready()) // if a task is Ready
                 {
-                    Tasks[i].Start();
-                    return;
+                    Tasks[i].Start(); 
+                    return; // start the task and exit the function
                 }
         }
     }
@@ -264,6 +286,9 @@ namespace YAYD
             if (totaltime.Ticks != 0) ret.Percent = ((double)ret.Time.Ticks) / ((double)totaltime.Ticks) * 100d;
             return ret;
         }
+        /// <summary>
+        /// Creates an empty instance. Used internally by other constructors.
+        /// </summary>
         private ProgressReportedEventArgs() { }
     }
     /// <summary>
@@ -1261,6 +1286,113 @@ namespace YAYD
                     if (!string.IsNullOrWhiteSpace(data))
                         if (TrimmedErrorDataReceived != null)
                             FinalDispatcher.Invoke(()=> { TrimmedErrorDataReceived?.Invoke(this, new AdvancedDataReceivedEventArgs(data, this, "ytdl_getID")); });
+            }
+            private void OnTrimmedOutputDataReceived(DataReceivedEventArgs data)
+            {
+                if (data != null)
+                    if (!string.IsNullOrWhiteSpace(data.Data))
+                        if (TrimmedOutputDataReceived != null)
+                            FinalDispatcher.Invoke(() => TrimmedOutputDataReceived?.Invoke(this, new AdvancedDataReceivedEventArgs(data.Data, new object[] { this, P }, new string[] { "ytdl_getID", "innerpocess" })));
+            }
+            private void OnTrimmedOutputDataReceived(string data)
+            {
+                if (data != null)
+                    if (!string.IsNullOrWhiteSpace(data))
+                        if (TrimmedOutputDataReceived != null)
+                            FinalDispatcher.Invoke(() => { TrimmedOutputDataReceived?.Invoke(this, new AdvancedDataReceivedEventArgs(data, this, "ytdl_getID")); });
+            }
+            private void OnStatusChanged(WorkerStatus s)
+            {
+                Status = s;
+                if (StatusChanged != null)
+                    FinalDispatcher.Invoke(() => { StatusChanged?.Invoke(this, EventArgs.Empty); });
+            }
+        }
+        /// <summary>
+        /// Class for updating the youtube-dl executable.
+        /// </summary>
+        public class UpdateYAYD : IReturnData
+        {
+            private Process P;
+            public WorkerStatus Status { get; private set; } = WorkerStatus.Pending;
+            public Dispatcher FinalDispatcher { get; }
+            public event TrimmedDataReceivedEventHandler TrimmedOutputDataReceived;
+            public event TrimmedDataReceivedEventHandler TrimmedErrorDataReceived;
+            public event ProgressReportedEventHandler ProgressReported;
+            public event EventHandler Finished;
+            public event EventHandler StatusChanged;
+            public bool Ready()
+            {
+                if (Status == WorkerStatus.Pending)
+                    OnStatusChanged(WorkerStatus.Ready);
+                return (Status == WorkerStatus.Ready);
+            }
+            public bool Start()
+            {
+                if (Status != WorkerStatus.Ready)
+                    return false;
+                OnStatusChanged(WorkerStatus.Running);
+                P.Start();
+                P.BeginErrorReadLine();
+                P.BeginOutputReadLine();
+                OnTrimmedOutputDataReceived("Inner process started.");
+                return true;
+            }
+            public UpdateYAYD(Dispatcher finaldispatcher = null)
+            {
+                if (finaldispatcher == null) FinalDispatcher = Dispatcher.CurrentDispatcher;
+                else FinalDispatcher = finaldispatcher;
+                P = new Process()
+                {
+                    EnableRaisingEvents = true,
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = @"youtube-dl.exe",
+                        Arguments = " -U",
+                        RedirectStandardError = true,
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    }
+                };
+                P.OutputDataReceived += P_OutputDataReceived;
+                P.ErrorDataReceived += P_ErrorDataReceived;
+                P.Exited += P_Exited;
+            }
+            private void P_Exited(object sender, EventArgs e)
+            {
+                P.OutputDataReceived -= P_OutputDataReceived;
+                P.ErrorDataReceived -= P_ErrorDataReceived;
+                P.Exited -= P_Exited;
+                OnTrimmedOutputDataReceived("Inner process Exit code=" + P.ExitCode);
+                if (P.ExitCode != 0) OnStatusChanged(WorkerStatus.Error);
+                else OnStatusChanged(WorkerStatus.Successful);
+                P.Close();
+                if (Finished != null)
+                    FinalDispatcher.Invoke(() => { Finished?.Invoke(this, EventArgs.Empty); });
+            }
+            private void P_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+            {
+                OnTrimmedErrorDataReceived(e);
+            }
+            private void P_OutputDataReceived(object sender, DataReceivedEventArgs e)
+            {
+                OnTrimmedOutputDataReceived(e);
+            }
+            private void OnTrimmedErrorDataReceived(DataReceivedEventArgs data)
+            {
+                if (data != null)
+                    if (!string.IsNullOrWhiteSpace(data.Data))
+                        if (TrimmedErrorDataReceived != null)
+                            FinalDispatcher.Invoke(() => TrimmedErrorDataReceived?.Invoke(this, new AdvancedDataReceivedEventArgs(data.Data, new object[] { this, P }, new string[] { "ytdl_getID", "innerpocess" })));
+            }
+            private void OnTrimmedErrorDataReceived(string data)
+            {
+                if (data != null)
+                    if (!string.IsNullOrWhiteSpace(data))
+                        if (TrimmedErrorDataReceived != null)
+                            FinalDispatcher.Invoke(() => { TrimmedErrorDataReceived?.Invoke(this, new AdvancedDataReceivedEventArgs(data, this, "ytdl_getID")); });
             }
             private void OnTrimmedOutputDataReceived(DataReceivedEventArgs data)
             {

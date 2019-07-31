@@ -19,9 +19,7 @@
         <GroupBox Header="About Musicarian">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
             <TextBlock TextWrapping="Wrap" TextAlignment="Justify">
-                The Musicarian is a tool for organizing audio collections, no matter their dimension or complexity.
-                The Musicarian also offers the option to download video files from Youtube.com and to later convert them to the desired format, or to keep them with the original format.
-                The Musicarian holds meta informations that the user can input, and it can help convert the files between standards.
+                
                 </TextBlock>
             </ScrollViewer>
         </GroupBox>
@@ -45,8 +43,7 @@
         </GroupBox>
         <TextBlock Grid.Row="1" Grid.ColumnSpan="3" TextAlignment="Center" TextWrapping="Wrap">
             © Vlad-Florin Chelaru, 30 decembrie 2017, Bacău, România. <LineBreak/>
-            Toate drepturile rezervate. Utilizarea acestui soft fără acordul autorului constituie încălcarea drepturilor de autor și atrage după sine pedepsele prevăzute de lege!<LineBreak/>
-            All rights reserved. Using this software without prior consent from the developer is against the Copyright Law and is punishable as per the Law!
+            AGPLv3
         </TextBlock>
     </Grid>
 </Window>

@@ -19,6 +19,21 @@ namespace YAYD.AuxWindows
     /// </summary>
     public partial class JointTextShow : Window
     {
+        /// <summary>
+        /// Usable if for any reason the window should not be closed prematurely by the user.
+        /// <code>
+        /// Window_Closing(...)
+        /// {
+        ///     if (HideInsteadOfClose)
+        ///     {
+        ///         e.Cancel = true;
+        ///         this.Hide();
+        ///     }
+        ///     else;
+        /// }
+        /// </code>
+        /// </summary>
+        public bool HideInsteadOfClose { get; set; } = false;
         public string Text
         {
             get
@@ -47,11 +62,6 @@ namespace YAYD.AuxWindows
             if (AlwaysLastLine.IsChecked == true)
                 TBParent.ScrollToBottom();
         }
-        public void ForceClose()
-        {
-            Closing -= Window_Closing;
-            this.Close();
-        }
         private void SaveLog_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog sfd = new Microsoft.Win32.SaveFileDialog()
@@ -72,8 +82,12 @@ namespace YAYD.AuxWindows
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = true;
-            this.Hide();
+            if (HideInsteadOfClose)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
+            else;
         }
     }
 }

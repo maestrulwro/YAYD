@@ -19,28 +19,36 @@ namespace YAYD.AdHocDownloaders
     /// </summary>
     public partial class MultipleLinks : Window
     {
+        /// <summary>
+        /// To be used when needed, like when showing UpdateYAYD.
+        /// </summary>
+        AuxWindows.JointTextShow jts = null;
         Scheduler sch;
+        /// <summary>
+        /// Creates a new window and its <c>Scheduler</c>.
+        /// </summary>
         public MultipleLinks()
         {
-            InitializeComponent();
-            sch = new Scheduler();
+            InitializeComponent(); //required
+            sch = new Scheduler(); //initializes the Scheduler.
         }
-
         private void NewURLInsert_Click(object sender, RoutedEventArgs e)
         {
             AddNewURLDownload(NewURL.Text);
             NewURL.Text = "";
         }
-
+        /// <summary>
+        /// Inserts a new URL in the queue.
+        /// </summary>
+        /// <param name="url">The URL to be downloaded.</param>
         private void AddNewURLDownload(string url)
         {
-            //Controls.SingleLinkInMultiWindowOld slimw = new Controls.SingleLinkInMultiWindowOld(url, "default.mp3");
-            Controls.SingleLinkInMultiWindow slimw = new Controls.SingleLinkInMultiWindow(url, "default.mp3");
-            ListOfDownloads.Children.Add(slimw);
-            sch.Tasks.Add(slimw);
+            Controls.SingleLinkInMultiWindow slimw = new Controls.SingleLinkInMultiWindow(url, "default.mp3"); // creates the control that downloads the URL
+            ListOfDownloads.Children.Add(slimw); // adds the control to the StackPanel that lists all URL downloaders
+            sch.Tasks.Add(slimw); //adds the control to the task list of the Scheduler
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Click(object sender, RoutedEventArgs e) //raised when clicking Links>Download from text file
         {
             Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog()
             {
@@ -54,20 +62,75 @@ namespace YAYD.AdHocDownloaders
                 Multiselect = false,
                 RestoreDirectory = true,
                 ValidateNames = true
-            };
+            }; // initializes an OpenFileDialog to select the .txt file
             if (ofd.ShowDialog() != true) return;
+            // if the user canceled, don't do anything and return
             // else continue
-            using (System.IO.StreamReader sr = new System.IO.StreamReader(ofd.FileName))
+            using (System.IO.StreamReader sr = new System.IO.StreamReader(ofd.FileName)) //open the file stream, read until the end, and for each non empty line add a link
                 while (!sr.EndOfStream)
                 {
                     string readurl = sr.ReadLine();
                     if (!string.IsNullOrWhiteSpace(readurl)) AddNewURLDownload(readurl);
                 }
         }
-
+        // enable the timer of the scheduler (effectively start the scheduler)
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             sch.Timer.IsEnabled = true;
+        }
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            YTDLInteract.UpdateYAYD upd = new YTDLInteract.UpdateYAYD();
+            jts = new AuxWindows.JointTextShow();
+            upd.TrimmedErrorDataReceived += Upd_TrimmedErrorDataReceived;
+            upd.TrimmedOutputDataReceived += Upd_TrimmedOutputDataReceived;
+            upd.Finished += Upd_Finished;
+            jts.Show();
+            upd.Ready();
+            upd.Start();
+        }
+
+        private void Upd_Finished(object sender, EventArgs e)
+        {
+            YTDLInteract.UpdateYAYD upd = (YTDLInteract.UpdateYAYD)sender;
+            jts.AppendOutput("Finished. Status reported: " + upd.Status);
+            jts.AppendOutput("Do note that the status is not trustworthy!");
+            upd.TrimmedErrorDataReceived -= Upd_TrimmedErrorDataReceived;
+            upd.TrimmedOutputDataReceived -= Upd_TrimmedOutputDataReceived;
+            upd.Finished -= Upd_Finished;
+
+        }
+
+        private void Upd_TrimmedOutputDataReceived(object sender, AdvancedDataReceivedEventArgs e)
+        {
+            jts.AppendOutput(e.FullData);
+        }
+
+        private void Upd_TrimmedErrorDataReceived(object sender, AdvancedDataReceivedEventArgs e)
+        {
+            jts.AppendError(e.FullData);
+        }
+
+        private void MenuItem_Click_2(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog()
+            {
+                AddExtension = true,
+                CheckFileExists = true,
+                CheckPathExists = true,
+                DefaultExt = "txt",
+                DereferenceLinks = true,
+                Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
+                FilterIndex = 1,
+                Multiselect = false,
+                RestoreDirectory = true,
+                ValidateNames = true
+            }; // initializes an OpenFileDialog to select the .txt file
+            if (ofd.ShowDialog() != true) return;
+            // if the user canceled, don't do anything and return
+            // else continue
+            new AuxWindows.GetIDShow(ofd.FileName).Show();
         }
     }
 }

@@ -8,11 +8,11 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Yet Another Youtube Downloader")]
-[assembly: AssemblyDescription("Un alt program de descărcat muzică de pe Youtube/Yet another Youtube Downloader")]
+[assembly: AssemblyDescription("Yet another Youtube Downloader")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Vlad-Florin Chelaru (Dezvoltator independent/Independent developer)")]
-[assembly: AssemblyProduct("Un alt program de descărcat muzică de pe Youtube/Yet another Youtube Downloader")]
-[assembly: AssemblyCopyright("© Vlad-Florin Chelaru, 2017-2018, Hârlești, Bacău, România. Toate drepturile rezervate.")]
+[assembly: AssemblyCompany("Vlad-Florin Chelaru")]
+[assembly: AssemblyProduct("Yet another Youtube Downloader")]
+[assembly: AssemblyCopyright("© Vlad-Florin Chelaru, 2017-2019, AGPLv3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

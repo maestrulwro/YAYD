@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-/// <summary>
-/// © Vlad-Florin Chelaru
-/// THIS FILE IS NOT OPEN SOURCE AND SHALL NOT BE USED IN OTHER PROJECTS
-/// THIS FILE IS PERSONALLY LICENSED BY ITS AUTHOR TO YAYD / UN ALT PROGRAM DE DESCĂRCAT MUZICĂ DE PE YOUTUBE
-/// </summary>
 namespace VFC
 {
     /// <summary>
@@ -1669,6 +1664,5 @@ namespace VFC
             }
         }
     }
-
 }
 

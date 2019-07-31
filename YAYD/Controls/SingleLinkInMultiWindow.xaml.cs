@@ -86,7 +86,10 @@ namespace YAYD.Controls
         }
         public SingleLinkInMultiWindow(string URL, string loc="")
         {
-            jointLog = new AuxWindows.JointTextShow();
+            jointLog = new AuxWindows.JointTextShow()
+            {
+                HideInsteadOfClose = true
+            };
             InitializeComponent();
             if (string.IsNullOrWhiteSpace(loc))
                 loc = "default.mp3";
@@ -154,7 +157,8 @@ namespace YAYD.Controls
             {
                 AccessOutput.Background = Brushes.LimeGreen;
                 AccessOutput.IsEnabled = false;
-                jointLog.ForceClose();
+                jointLog.HideInsteadOfClose = false;
+                if (jointLog.IsVisible == false) jointLog.Close();
             }
             else if (AdHocDownLoadAndConvertMP3.Status == WorkerStatus.Error)
                 AccessOutput.Background = Brushes.Red;

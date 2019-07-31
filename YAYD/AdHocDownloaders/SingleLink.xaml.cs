@@ -10,16 +10,22 @@ namespace YAYD.AdHocDownloaders
     /// </summary>
     public partial class SingleLink : Window, YAYD.IReturnData
     {
+        /// <summary>
+        /// The title of the video to be downloaded, with strange unsafe characters removed.
+        /// </summary>
         string SafeTitle
         {
             get
             {
-                string ret = gm.Title;
-                char[] ch = System.IO.Path.GetInvalidFileNameChars().Concat(System.IO.Path.GetInvalidPathChars()).ToArray();
-                foreach (char c in ch) ret = ret.Replace(c.ToString(), "");
-                return ret;
+                string ret = gm.Title; //gets the original title
+                char[] ch = System.IO.Path.GetInvalidFileNameChars().Concat(System.IO.Path.GetInvalidPathChars()).ToArray(); //gets the unsafe characters
+                foreach (char c in ch) ret = ret.Replace(c.ToString(), ""); // removes the unsafe characters
+                return ret; //returns the safe title
             }
         }
+        /// <summary>
+        /// The complete path to the thumbnail.
+        /// </summary>
         string SafeThumbNailName
         {
             get
