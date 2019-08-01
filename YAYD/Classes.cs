@@ -934,7 +934,7 @@ namespace YAYD
                 }
                 return (Status == WorkerStatus.Ready);
             }
-            public Download(string url, string format, string locationoffinalfile, Dispatcher finalthread = null)
+            public Download(string url, string format, string locationoffinalfile = "%(title)s.%(ext)s", Dispatcher finalthread = null)
             {
                 URL = url;
                 FormatToDownload = format;
@@ -1998,21 +1998,12 @@ namespace YAYD
                     OnFinished();
                     return;
                 }
-                string chnm;
-                if (LocationOfFinalFile.Name == "default" || LocationOfFinalFile.Name == "default.mp3")
-                    chnm = GetMeta.Title + ".mp3";
-                else
-                    chnm = LocationOfFinalFile.Name;
-                foreach (char c in System.IO.Path.GetInvalidPathChars())
-                    chnm = chnm.Replace(c.ToString(), "");
-                foreach (char c in System.IO.Path.GetInvalidFileNameChars())
-                    chnm = chnm.Replace(c.ToString(), "");
-                OnTrimmedOutputDataReceived("Chosen name = " + chnm);
-                LocationOfFinalFile = new System.IO.FileInfo(LocationOfFinalFile.DirectoryName + @"\" + chnm);
-                LocationOfTempDirectory = new System.IO.DirectoryInfo(LocationOfFinalFile.DirectoryName + @"\YAYD_TEMP3DL_" + chnm);
+                LocationOfTempDirectory = new System.IO.DirectoryInfo(LocationOfFinalFile.DirectoryName + @"\YAYD_TEMP3DL_" + GetMeta.ID);
                 if (GetMetaFinished != null)
                     FinalDispatcher.Invoke(() => { GetMetaFinished?.Invoke(this, EventArgs.Empty); });
-                if (LocationOfFinalFile.Exists)
+                if (LocationOfFinalFile.Name == "default" || LocationOfFinalFile.Name == "default.mp3")
+                    OnTrimmedOutputDataReceived("The LOFF is default, skipping check of preexistent final file.");
+                else if (LocationOfFinalFile.Exists)
                 {
                     OnTrimmedOutputDataReceived("Final file already exists. Deleting it.");
                     try
@@ -2031,19 +2022,28 @@ namespace YAYD
                     OnTrimmedOutputDataReceived("Final file doesn't exist and I'm happy.😊");
                 if (LocationOfTempDirectory.Exists)
                 {
-                    OnTrimmedOutputDataReceived("Temp directory already exists. Deleting it.");
-                    try
-                    {
-                        LocationOfTempDirectory.Delete(true);
-                    }
-                    catch (Exception exc)
-                    {
-                        OnTrimmedErrorDataReceived("Unable to delete temp dir already present: " + exc.ToString());
-                        OnStatusChanged(WorkerStatus.Error);
-                        OnFinished();
-                        return;
-                    }
+                    OnTrimmedErrorDataReceived("Temp dir exists already. This might mean that another download of the same video is already running.");
+                    OnTrimmedErrorDataReceived("If this is not the case, manually delete the temp folder and try again.");
+                    OnTrimmedErrorDataReceived("Location: " + LocationOfTempDirectory.FullName);
+                    OnStatusChanged(WorkerStatus.Error);
+                    OnFinished();
+                    return;
                 }
+                // COMMENTED OUT: the fact that this temp dir already exists means that there is another download of the same file running already. The current download needs to be aborted.
+                //{
+                //    OnTrimmedOutputDataReceived("Temp directory already exists. Deleting it.");
+                //    try
+                //    {
+                //        LocationOfTempDirectory.Delete(true);
+                //    }
+                //    catch (Exception exc)
+                //    {
+                //        OnTrimmedErrorDataReceived("Unable to delete temp dir already present: " + exc.ToString());
+                //        OnStatusChanged(WorkerStatus.Error);
+                //        OnFinished();
+                //        return;
+                //    }
+                //}
                 else
                     OnTrimmedOutputDataReceived("Temp directory doesn't exist and I'm happy.😊");
                 OnTrimmedOutputDataReceived("Creating new temp directory.");
@@ -2059,7 +2059,19 @@ namespace YAYD
                     return;
                 }
                 OnTrimmedOutputDataReceived("Temp dir created and I'm happy.😊");
-                Download = new YTDLInteract.Download(URL, "bestaudio", LocationOfTempDirectory.FullName + @"\audio");
+                try
+                {
+                    System.IO.Directory.CreateDirectory(LocationOfTempDirectory.FullName + @"\audio");
+                }
+                catch (Exception exc)
+                {
+                    OnTrimmedErrorDataReceived("Unable to create audio folder in temp dir: " + exc.ToString());
+                    OnStatusChanged(WorkerStatus.Error);
+                    OnFinished();
+                    return;
+                }
+                OnTrimmedOutputDataReceived("Audio folder in temp dir created and I'm happy.😊");
+                Download = new YTDLInteract.Download(URL, "bestaudio", LocationOfTempDirectory.FullName + @"\audio\%(title)s");
                 Download.TrimmedOutputDataReceived += OnTrimmedOutputDataReceived;
                 Download.TrimmedErrorDataReceived += OnTrimmedErrorDataReceived;
                 Download.ProgressReported += Download_ProgressReported;
@@ -2081,6 +2093,12 @@ namespace YAYD
                     OnStatusChanged(WorkerStatus.Error);
                     OnFinished();
                     return;
+                }
+                if(LocationOfFinalFile.Name=="default" || LocationOfFinalFile.Name == "default.mp3")
+                {
+                    string realname = new System.IO.FileInfo(System.IO.Directory.GetFiles(LocationOfTempDirectory.FullName + @"\audio")[0]).Name;
+                    LocationOfFinalFile = new System.IO.FileInfo(LocationOfFinalFile.Directory + @"\" + realname + ".mp3");
+                    OnTrimmedOutputDataReceived("LOFF was default, now changed to:" + LocationOfFinalFile.FullName);
                 }
                 if (DownloadFinished != null)
                     FinalDispatcher.Invoke(() => { DownloadFinished?.Invoke(this, EventArgs.Empty); });
@@ -2109,7 +2127,7 @@ namespace YAYD
                 }
                 if (DownloadThumbNailFinished != null)
                     FinalDispatcher.Invoke(() => { DownloadThumbNailFinished?.Invoke(this, EventArgs.Empty); });
-                Convert = new FFMPEGInteract.MP3Interact.Convert(LocationOfTempDirectory.FullName + @"\audio", LocationOfFinalFile.FullName, FFMPEGInteract.MP3Interact.OutputFormat.DefaultOutputFormat, null, LocationOfTempDirectory.FullName + @"\thumbnail");
+                Convert = new FFMPEGInteract.MP3Interact.Convert(LocationOfTempDirectory.FullName + @"\audio\" + System.IO.Path.GetFileNameWithoutExtension(LocationOfFinalFile.FullName), LocationOfFinalFile.FullName, FFMPEGInteract.MP3Interact.OutputFormat.DefaultOutputFormat, null, LocationOfTempDirectory.FullName + @"\thumbnail");
                 Convert.TrimmedOutputDataReceived += OnTrimmedOutputDataReceived;
                 Convert.TrimmedErrorDataReceived += OnTrimmedErrorDataReceived;
                 Convert.ProgressReported += Convert_ProgressReported;
@@ -2133,6 +2151,18 @@ namespace YAYD
                     return;
                 }
                 OnTrimmedOutputDataReceived("Everything is finished and I'm happy.😊");
+                try
+                {
+                    LocationOfTempDirectory.Delete(true);
+                    OnTrimmedOutputDataReceived("Temp dir removed.");
+                }
+                catch (Exception exc)
+                {
+                    OnTrimmedErrorDataReceived("Unable to delete temp dir, but it doesn't matter for now.");
+                    OnTrimmedErrorDataReceived("Future downloads of the same video might fail because of this temp dir.");
+                    OnTrimmedErrorDataReceived("Reason: " + exc.ToString());
+                    OnTrimmedErrorDataReceived("Location of temp dir: " + LocationOfTempDirectory.FullName);
+                }
                 if (ConvertFinished != null)
                     FinalDispatcher.Invoke(() => { ConvertFinished?.Invoke(this, EventArgs.Empty); });
                 OnStatusChanged(WorkerStatus.Successful);
