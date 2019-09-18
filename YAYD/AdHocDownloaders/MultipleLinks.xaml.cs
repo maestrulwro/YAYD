@@ -1,4 +1,6 @@
-﻿using System;
+﻿// This file is completely commented.
+// To do: change names for objects in menu.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -78,25 +80,25 @@ namespace YAYD.AdHocDownloaders
         {
             sch.Timer.IsEnabled = true;
         }
-
-        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        // Menu: update youtube-dl
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e) //raised when clicked Update youtube-dl in menu
         {
-            YTDLInteract.UpdateYAYD upd = new YTDLInteract.UpdateYAYD();
-            jts = new AuxWindows.JointTextShow();
-            upd.TrimmedErrorDataReceived += Upd_TrimmedErrorDataReceived;
-            upd.TrimmedOutputDataReceived += Upd_TrimmedOutputDataReceived;
-            upd.Finished += Upd_Finished;
-            jts.Show();
-            upd.Ready();
-            upd.Start();
+            YTDLInteract.UpdateYAYD upd = new YTDLInteract.UpdateYAYD(); // create new instance
+            jts = new AuxWindows.JointTextShow(); // create new console window
+            upd.TrimmedErrorDataReceived += Upd_TrimmedErrorDataReceived; // send output to console
+            upd.TrimmedOutputDataReceived += Upd_TrimmedOutputDataReceived; // send error to console
+            upd.Finished += Upd_Finished; // cleanup after finishing with the command
+            jts.Show(); // show the console window
+            upd.Ready(); 
+            upd.Start(); // start the update
         }
 
         private void Upd_Finished(object sender, EventArgs e)
         {
-            YTDLInteract.UpdateYAYD upd = (YTDLInteract.UpdateYAYD)sender;
+            YTDLInteract.UpdateYAYD upd = (YTDLInteract.UpdateYAYD)sender; // get the UpdateYAYD instance as UpdateYAYD, not as object
             jts.AppendOutput("Finished. Status reported: " + upd.Status);
             jts.AppendOutput("Do note that the status is not trustworthy!");
-            upd.TrimmedErrorDataReceived -= Upd_TrimmedErrorDataReceived;
+            upd.TrimmedErrorDataReceived -= Upd_TrimmedErrorDataReceived; // disconnect the events to let the UpdateYAYD instance die
             upd.TrimmedOutputDataReceived -= Upd_TrimmedOutputDataReceived;
             upd.Finished -= Upd_Finished;
 
@@ -131,6 +133,10 @@ namespace YAYD.AdHocDownloaders
             // if the user canceled, don't do anything and return
             // else continue
             new AuxWindows.GetIDShow(ofd.FileName).Show();
+        }
+        private void MenuItem_AppSettings_Click(object sender, RoutedEventArgs e)
+        {
+            new Settings().Show();
         }
     }
 }

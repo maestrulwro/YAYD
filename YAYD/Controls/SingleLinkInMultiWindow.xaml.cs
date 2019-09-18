@@ -1,4 +1,5 @@
-﻿using System;
+﻿// nothing to be done here
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -84,6 +85,11 @@ namespace YAYD.Controls
                 ((IReturnData)AdHocDownLoadAndConvertMP3).StatusChanged -= value;
             }
         }
+        /// <summary>
+        /// Initializes a new control, and its corresponding <c>Orchestrators.AdHocDownLoadAndConvertMP3</c>.
+        /// </summary>
+        /// <param name="URL">The URL to download.</param>
+        /// <param name="loc">Location of final file.</param>
         public SingleLinkInMultiWindow(string URL, string loc="")
         {
             jointLog = new AuxWindows.JointTextShow()
@@ -94,7 +100,6 @@ namespace YAYD.Controls
             if (string.IsNullOrWhiteSpace(loc))
                 loc = "default.mp3";
             AdHocDownLoadAndConvertMP3 = new Orchestrators.AdHocDownLoadAndConvertMP3(URL,loc, this.Dispatcher);
-            
             AdHocDownLoadAndConvertMP3.TrimmedOutputDataReceived += AdHocDownLoadAndConvertMP3_TrimmedOutputDataReceived;
             AdHocDownLoadAndConvertMP3.TrimmedErrorDataReceived += AdHocDownLoadAndConvertMP3_TrimmedErrorDataReceived;
             AdHocDownLoadAndConvertMP3.Finished += AdHocDownLoadAndConvertMP3_Finished;

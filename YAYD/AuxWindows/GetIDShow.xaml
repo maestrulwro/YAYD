@@ -82,7 +82,7 @@
         </Grid>
         <DataGrid Name="ListOfURLsDG" Grid.Row="2" Grid.Column="2" AutoGenerateColumns="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="IsFinished" IsReadOnly="True" Binding="{Binding GID.Status, Mode=OneWay}"/>
+                <DataGridTextColumn Header="Status" IsReadOnly="True" Binding="{Binding GID.Status}"/>
                 <DataGridTextColumn Header="URL" Width="*" IsReadOnly="True" Binding="{Binding URL}"/>
             </DataGrid.Columns>
             <DataGrid.RowStyle>

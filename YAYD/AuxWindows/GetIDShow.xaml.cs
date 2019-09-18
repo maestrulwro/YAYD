@@ -117,18 +117,19 @@ namespace YAYD.AuxWindows
         }
         public class URLInList
         {
-            public enum Status
-            {
-                Pending,
-                Running,
-                Finished
-            }
-            public YTDLInteract.GetID GID { get; }
+            // BUG: unable to use URLInList.Status instead of GID.Status in the datagrid.
+            public YTDLInteract.GetID GID { get; private set; }
             public string URL { get; }
             public URLInList(string url)
             {
                 URL = url;
                 GID = new YTDLInteract.GetID(URL);
+                GID.Finished += GID_Finished;
+            }
+
+            private void GID_Finished(object sender, EventArgs e)
+            {
+                GID = null;
             }
         }
     }

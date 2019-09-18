@@ -103,6 +103,9 @@
     <Compile Include="Controls\SingleLinkInMultiWindow.xaml.cs">
       <DependentUpon>SingleLinkInMultiWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Test windows\FFMPEGManualTester.xaml.cs">
       <DependentUpon>FFMPEGManualTester.xaml</DependentUpon>
     </Compile>
@@ -160,6 +163,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Test windows\FFMPEGManualTester.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

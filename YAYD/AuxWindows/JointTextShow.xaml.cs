@@ -87,7 +87,7 @@ namespace YAYD.AuxWindows
                 e.Cancel = true;
                 this.Hide();
             }
-            else;
+            else { };
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// TODO: comment
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
@@ -107,9 +108,12 @@ namespace YAYD
         /// <param name="maxtasksrunning">The (maximum) number of tasks/workers running at a given time.</param>
         /// <param name="ts">Period between checks to try to run a new worker.</param>
         /// <param name="dispatcher">The dispatcher on which to run the timer and do <c>Worker.Start()</c>.</param>
-        public Scheduler(int maxtasksrunning = 6, TimeSpan? ts = null, Dispatcher dispatcher = null)
+        public Scheduler(int maxtasksrunning = 0, TimeSpan? ts = null, Dispatcher dispatcher = null)
         {
-            MaxRunningTaskCount = maxtasksrunning;
+            if (maxtasksrunning == 0)
+                MaxRunningTaskCount = Properties.Settings.Default.MaxWorkUnitsInScheduler;
+            else
+                MaxRunningTaskCount = maxtasksrunning;
             TimeSpan tsp;
             if (dispatcher == null)
                 dispatcher = Dispatcher.CurrentDispatcher;
@@ -139,9 +143,14 @@ namespace YAYD
             for (int i = 0; i < Tasks.Count; i++) // iterate through the tasks
                 if (Tasks[i].Ready()) // if a task is Ready
                 {
-                    Tasks[i].Start(); 
+                    Tasks[i].Start();
+                    Tasks[i].Finished += SomeTask_Finished;
                     return; // start the task and exit the function
                 }
+        }
+        private void SomeTask_Finished(object sender, EventArgs e)
+        {
+            Tasks.Remove(((IReturnData)sender));
         }
     }
     /// <summary>
@@ -2102,13 +2111,26 @@ namespace YAYD
                 }
                 if (DownloadFinished != null)
                     FinalDispatcher.Invoke(() => { DownloadFinished?.Invoke(this, EventArgs.Empty); });
-                DownloadThumbNail = new WebInteract.DownloadThumbNail(GetMeta.ThumbnailURL, LocationOfTempDirectory.FullName + @"\thumbnail");
-                DownloadThumbNail.TrimmedOutputDataReceived += OnTrimmedOutputDataReceived;
-                DownloadThumbNail.TrimmedErrorDataReceived += OnTrimmedErrorDataReceived;
-                DownloadThumbNail.ProgressReported += DownloadThumbNail_ProgressReported;
-                DownloadThumbNail.Finished += DownloadThumbNail_Finished;
-                DownloadThumbNail.Ready();
-                DownloadThumbNail.Start();
+                if (Properties.Settings.Default.IncludeThumbnailInAdHocDownloadAndConvert)
+                {
+                    DownloadThumbNail = new WebInteract.DownloadThumbNail(GetMeta.ThumbnailURL, LocationOfTempDirectory.FullName + @"\thumbnail");
+                    DownloadThumbNail.TrimmedOutputDataReceived += OnTrimmedOutputDataReceived;
+                    DownloadThumbNail.TrimmedErrorDataReceived += OnTrimmedErrorDataReceived;
+                    DownloadThumbNail.ProgressReported += DownloadThumbNail_ProgressReported;
+                    DownloadThumbNail.Finished += DownloadThumbNail_Finished;
+                    DownloadThumbNail.Ready();
+                    DownloadThumbNail.Start();
+                }
+                else
+                {
+                    Convert = new FFMPEGInteract.MP3Interact.Convert(LocationOfTempDirectory.FullName + @"\audio\" + System.IO.Path.GetFileNameWithoutExtension(LocationOfFinalFile.FullName), LocationOfFinalFile.FullName, FFMPEGInteract.MP3Interact.OutputFormat.DefaultOutputFormat, null);
+                    Convert.TrimmedOutputDataReceived += OnTrimmedOutputDataReceived;
+                    Convert.TrimmedErrorDataReceived += OnTrimmedErrorDataReceived;
+                    Convert.ProgressReported += Convert_ProgressReported;
+                    Convert.Finished += Convert_Finished;
+                    Convert.Ready();
+                    Convert.Start();
+                }
             }
             private void DownloadThumbNail_Finished(object sender, EventArgs e)
             {

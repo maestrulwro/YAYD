@@ -26,6 +26,7 @@
                 </MenuItem>
                 <MenuItem Header="Options">
                     <MenuItem Header="Update youtube-dl" Click="MenuItem_Click_1"/>
+                    <MenuItem Header="Application settings" Click="MenuItem_AppSettings_Click"/>
                 </MenuItem>
             </Menu>
         </DockPanel>
